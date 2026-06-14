@@ -3,20 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from collections import defaultdict, deque
 
-app = FastAPI()
+api_app = FastAPI()
 
-
-@app.middleware('http')
-async def strip_api_prefix(request, call_next):
-    if request.url.path.startswith('/api/'):
-        request.scope['path'] = request.url.path[4:]
-    elif request.url.path == '/api':
-        request.scope['path'] = '/'
-    response = await call_next(request)
-    return response
-
-
-app.add_middleware(
+api_app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
     allow_methods=['*'],
@@ -29,12 +18,12 @@ class Pipeline(BaseModel):
     edges: list[dict]
 
 
-@app.get('/')
+@api_app.get('/')
 def read_root():
     return {'Ping': 'Pong'}
 
 
-@app.post('/pipelines/parse')
+@api_app.post('/pipelines/parse')
 def parse_pipeline(pipeline: Pipeline):
     num_nodes = len(pipeline.nodes)
     num_edges = len(pipeline.edges)
@@ -71,3 +60,7 @@ def parse_pipeline(pipeline: Pipeline):
         'num_edges': num_edges,
         'is_dag': is_dag,
     }
+
+
+app = FastAPI()
+app.mount('/api', api_app)
