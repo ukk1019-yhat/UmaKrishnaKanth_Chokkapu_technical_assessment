@@ -5,6 +5,17 @@ from collections import defaultdict, deque
 
 app = FastAPI()
 
+
+@app.middleware('http')
+async def strip_api_prefix(request, call_next):
+    if request.url.path.startswith('/api/'):
+        request.scope['path'] = request.url.path[4:]
+    elif request.url.path == '/api':
+        request.scope['path'] = '/'
+    response = await call_next(request)
+    return response
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
