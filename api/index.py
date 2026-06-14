@@ -18,12 +18,12 @@ class Pipeline(BaseModel):
     edges: list[dict]
 
 
-@app.get('/api')
+@app.get('/')
 def read_root():
     return {'Ping': 'Pong'}
 
 
-@app.post('/api/pipelines/parse')
+@app.post('/pipelines/parse')
 def parse_pipeline(pipeline: Pipeline):
     num_nodes = len(pipeline.nodes)
     num_edges = len(pipeline.edges)
